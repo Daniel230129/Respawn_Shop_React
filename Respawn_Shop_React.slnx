@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="respawn_shop_react.client/respawn_shop_react.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Respawn_Shop_React.Server/Respawn_Shop_React.Server.csproj" />
+</Solution>
