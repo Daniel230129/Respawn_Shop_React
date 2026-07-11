@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { AuthContext } from '../context/AuthContext'; // <-- Importamos el cerebro
 
 const detalleStyles = `
 .detalle-page {
@@ -354,6 +355,27 @@ function ProductoDetalle() {
     const [cargando, setCargando] = useState(true);
 
     const { agregarAlCarrito } = useContext(CartContext);
+    const { usuario } = useContext(AuthContext); // <-- Extraemos al usuario
+    const navigate = useNavigate(); // <-- Instanciamos la navegación
+
+    // NUEVAS FUNCIONES: Redirección suave para ambos botones
+    const intentarAgregar = () => {
+        if (!usuario) {
+            navigate('/login');
+            return;
+        }
+        agregarAlCarrito(producto);
+    };
+
+    const intentarComprar = () => {
+        if (!usuario) {
+            navigate('/login');
+            return;
+        }
+        // Si está logueado, lo mandamos directo al carrito a pagar
+        agregarAlCarrito(producto);
+        navigate('/carrito');
+    };
 
     useEffect(() => {
         const fetchProducto = async () => {
@@ -392,20 +414,17 @@ function ProductoDetalle() {
         </>
     );
 
-    // Calculamos las cuotas para que se vea como en la imagen
     const cuotas = (producto.precio / 6).toFixed(2);
 
     return (
         <>
             <style>{detalleStyles}</style>
             <div className="detalle-page">
-                {/* Enlace de regreso */}
                 <Link to="/catalogo" className="detalle-back">
                     ← Volver al catálogo
                 </Link>
 
                 <div className="detalle-layout">
-                    {/* --- COLUMNA IZQUIERDA: IMAGEN --- */}
                     <div className="detalle-img-col">
                         <div className="detalle-img-wrapper">
                             <img
@@ -417,9 +436,7 @@ function ProductoDetalle() {
                         </div>
                     </div>
 
-                    {/* --- COLUMNA DERECHA: INFORMACIÓN --- */}
                     <div className="detalle-info-col">
-                        {/* Badges / Etiquetas */}
                         <div className="detalle-badges">
                             <span className="detalle-badge tipo-juego">JUEGOS</span>
                             <span className="detalle-badge tipo-digital">DIGITAL</span>
@@ -428,26 +445,22 @@ function ProductoDetalle() {
                             )}
                         </div>
 
-                        {/* Título y Género */}
                         <div>
                             <h1 className="detalle-title">{producto.nombre}</h1>
                             <p className="detalle-genre">🎭 Género: {producto.categoria?.nombre || 'Acción / Aventura'}</p>
                         </div>
 
-                        {/* Reseñas (Simuladas) */}
                         <div className="detalle-stars">
                             ★★★★☆
                             <span>(124 reseñas)</span>
                         </div>
 
-                        {/* Descripción del producto */}
                         {producto.descripcion && (
                             <div className="detalle-description">
                                 <span className="detalle-description-title">Descripción</span>
                                 {producto.descripcion}
                             </div>
                         )}
-                        {/* CAJA DE PRECIO Y CARRITO */}
                         <div className="detalle-price-box">
                             <div>
                                 <div className="detalle-price">${producto.precio?.toFixed(2)}</div>
@@ -456,7 +469,6 @@ function ProductoDetalle() {
                                 </p>
                             </div>
 
-                            {/* Estado del Stock */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                 <span className="detalle-stock-badge">
                                     <span className="detalle-stock-icon">⚡</span>
@@ -467,23 +479,22 @@ function ProductoDetalle() {
                                 </span>
                             </div>
 
-                            {/* Botones */}
+                            {/* PROTEGEMOS LOS DOS BOTONES AQUÍ ABAJO */}
                             <button
-                                onClick={() => alert('Redirigiendo a pasarela de pago...')}
+                                onClick={intentarComprar}
                                 className="detalle-btn-buy"
                             >
                                 🛒 COMPRAR AHORA
                             </button>
 
                             <button
-                                onClick={() => agregarAlCarrito(producto)}
+                                onClick={intentarAgregar}
                                 className="detalle-btn-cart"
                             >
                                 + Añadir al Carrito
                             </button>
                         </div>
 
-                        {/* Políticas de la tienda */}
                         <div className="detalle-benefits">
                             <div className="detalle-benefit">
                                 <span className="detalle-benefit-icon">🚚</span>

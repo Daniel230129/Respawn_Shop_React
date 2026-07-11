@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
 import { CartContext } from '../context/CartContext';
+import { AuthContext } from '../context/AuthContext'; // <-- Importamos el cerebro
 
 const catalogoStyles = `
 .catalogo-page {
@@ -172,21 +173,27 @@ function Catalogo() {
     const [categorias, setCategorias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
-
-    // null = "Todos", número = id de categoría seleccionada
     const [categoriaActiva, setCategoriaActiva] = useState(null);
     const [busqueda, setBusqueda] = useState('');
 
-    // 1. EXTRAEMOS LA FUNCIÓN DEL CEREBRO GLOBAL AQUÍ ADENTRO
     const { agregarAlCarrito } = useContext(CartContext);
+    const { usuario } = useContext(AuthContext); // <-- Extraemos al usuario
+    const navigate = useNavigate(); // <-- Instanciamos la navegación
 
-    // Leer el filtro de categoría que viene desde la Landing Page (por nombre)
     const location = useLocation();
+
+    // NUEVA FUNCIÓN: Redirección suave
+    const intentarAgregar = (producto) => {
+        if (!usuario) {
+            navigate('/login');
+            return;
+        }
+        agregarAlCarrito(producto);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Cargamos productos Y categorías en paralelo
                 const [resProductos, resCategorias] = await Promise.all([
                     fetch('https://localhost:7284/api/Productos'),
                     fetch('https://localhost:7284/api/Categorias'),
@@ -201,8 +208,6 @@ function Catalogo() {
                     const dataCategorias = await resCategorias.json();
                     setCategorias(dataCategorias);
 
-                    // Si llegamos desde la landing con un nombre de categoría,
-                    // buscamos el ID correspondiente para hacer el filtro exacto
                     if (location.state?.categoriaInicial) {
                         const nombreBuscado = location.state.categoriaInicial.toLowerCase();
                         const catEncontrada = dataCategorias.find(c =>
@@ -222,7 +227,7 @@ function Catalogo() {
         };
 
         fetchData();
-    }, []); // Solo al montar
+    }, [location.state?.categoriaInicial]);
 
     if (cargando) return (
         <>
@@ -241,7 +246,6 @@ function Catalogo() {
         </>
     );
 
-    // Filtrar por categoría (match exacto por ID) y por búsqueda de texto
     const productosFiltrados = productos.filter(p => {
         const matchBusqueda = p.nombre?.toLowerCase().includes(busqueda.toLowerCase());
         const matchCategoria = categoriaActiva === null || p.categoriaId === categoriaActiva;
@@ -253,15 +257,12 @@ function Catalogo() {
             <style>{catalogoStyles}</style>
             <div className="catalogo-page">
 
-                {/* HEADER */}
                 <div className="catalogo-header">
                     <h1 className="catalogo-title">🎮 Catálogo de Productos</h1>
                     <div className="catalogo-title-line"></div>
                 </div>
 
-                {/* BARRA DE FILTROS — chips dinámicos desde la API */}
                 <div className="catalogo-filters">
-                    {/* Chip "Todos" */}
                     <button
                         className={`filter-chip${categoriaActiva === null ? ' active' : ''}`}
                         onClick={() => setCategoriaActiva(null)}
@@ -269,7 +270,6 @@ function Catalogo() {
                         Todos
                     </button>
 
-                    {/* Chips dinámicos por cada categoría real de la BD */}
                     {categorias.map(cat => (
                         <button
                             key={cat.id}
@@ -291,11 +291,9 @@ function Catalogo() {
                     </div>
                 </div>
 
-                {/* GRID DE PRODUCTOS */}
                 <div className="catalogo-grid">
                     {productosFiltrados.map((producto) => (
                         <div key={producto.id} className="product-card">
-                            {/* Imagen con link */}
                             <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                                 <div className="product-card-img-wrapper">
                                     <img
@@ -326,9 +324,9 @@ function Catalogo() {
 
                                 <span className="product-card-price">${producto.precio?.toFixed(2)}</span>
 
-                                {/* 2. EL BOTÓN AHORA SÍ CONOCE LA FUNCIÓN */}
+                                {/* PROTEGEMOS EL BOTÓN */}
                                 <button
-                                    onClick={() => agregarAlCarrito(producto)}
+                                    onClick={() => intentarAgregar(producto)}
                                     className="product-card-btn"
                                 >
                                     🛒 Añadir al Carrito
@@ -345,7 +343,6 @@ function Catalogo() {
                     </div>
                 )}
 
-                {/* BOTÓN CARGAR MÁS */}
                 {productosFiltrados.length > 0 && (
                     <div className="catalogo-footer">
                         <button className="btn-secondary">

@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { AuthContext } from '../context/AuthContext';
 
 const navbarStyles = `
 .navbar {
@@ -92,6 +93,74 @@ const navbarStyles = `
 .navbar-nav a.active::after {
     width: 70%;
 }
+
+/* --- ESTILOS PARA EL BOTÓN DE ADMIN --- */
+.navbar-nav a.admin-link {
+    color: #FFD700; /* Dorado */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+.navbar-nav a.admin-link::after {
+    background: linear-gradient(90deg, #FFD700, #FF8C00);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+.navbar-nav a.admin-link:hover {
+    color: #FFF;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+.navbar-nav a.admin-link.active {
+    color: #FFF;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+
+/* --- ESTILOS PARA LA SECCIÓN DE USUARIO --- */
+.navbar-auth-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar-greeting {
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.navbar-greeting span {
+    color: #00D4FF;
+    font-weight: 700;
+}
+
+.navbar-btn-outline {
+    background: transparent;
+    color: #00D4FF;
+    border: 1px solid #00D4FF;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.navbar-btn-outline:hover {
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+}
+
+.navbar-btn-logout {
+    color: #FF006E;
+    border-color: #FF006E;
+}
+
+.navbar-btn-logout:hover {
+    background: rgba(255, 0, 110, 0.1);
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
+    color: #FFFFFF;
+}
+/* ------------------------------------------------- */
 
 .navbar-cart-btn {
     position: relative;
@@ -211,16 +280,28 @@ const navbarStyles = `
 @media (max-width: 768px) {
     .navbar-hamburger { display: flex; }
     .navbar-nav { display: none; }
-    .navbar-cart-btn { display: none; }
+    .navbar-auth-section { display: none; }
     .navbar-logo { font-size: 1.1rem; }
 }
 `;
 
 function Header() {
-    const { carrito } = useContext(CartContext);
+    const { carrito, vaciarCarrito } = useContext(CartContext);
+    const { usuario, logout } = useContext(AuthContext);
+
+    // 1. LEEMOS EL ROL DIRECTAMENTE DE LA MEMORIA
+    const isAdmin = localStorage.getItem('rol') === 'Administrador';
+
     const cantidadTotal = carrito.reduce((acc, item) => acc + item.cantidad, 0);
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
+
+    // 2. MODIFICAMOS LA SALIDA PARA BORRAR EL ROL Y QUE DESAPAREZCA EL BOTÓN
+    const cerrarSesionCompleta = () => {
+        vaciarCarrito();
+        logout();
+        localStorage.removeItem('rol'); // ¡Súper importante para la seguridad!
+    };
 
     const isActive = (path) =>
         path === '/'
@@ -231,30 +312,47 @@ function Header() {
         <>
             <style>{navbarStyles}</style>
             <header className="navbar">
-                {/* LOGO */}
                 <Link to="/" className="navbar-logo">
                     <span className="navbar-logo-icon">🎮</span>
                     Respawn Shop
                 </Link>
 
-                {/* NAV DESKTOP */}
                 <nav>
                     <ul className="navbar-nav">
                         <li><Link to="/" className={isActive('/') ? 'active' : ''}>Inicio</Link></li>
                         <li><Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''}>Catálogo</Link></li>
                         <li><Link to="/carrito" className={isActive('/carrito') ? 'active' : ''}>Carrito</Link></li>
+
+                        {/* 3. LÓGICA CONDICIONAL: SOLO APARECE SI ES ADMIN */}
+                        {isAdmin && (
+                            <li>
+                                {/* Asegúrate de que este "to=" sea EXACTAMENTE como lo tienes en App.jsx */}
+                                <Link to="/admin" className={`admin-link ${isActive('/admin') ? 'active' : ''}`}>
+                                    👑 Panel Admin
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </nav>
 
-                {/* BOTÓN CARRITO */}
-                <Link to="/carrito" className="navbar-cart-btn">
-                    🛒 Carrito
-                    {cantidadTotal > 0 && (
-                        <span className="navbar-cart-badge">{cantidadTotal}</span>
+                <div className="navbar-auth-section">
+                    {usuario ? (
+                        <>
+                            <span className="navbar-greeting">Hola, <span>{usuario.nombre}</span></span>
+                            <button onClick={cerrarSesionCompleta} className="navbar-btn-outline navbar-btn-logout">Salir</button>
+                        </>
+                    ) : (
+                        <Link to="/login" className="navbar-btn-outline">Iniciar Sesión</Link>
                     )}
-                </Link>
 
-                {/* HAMBURGER MÓVIL */}
+                    <Link to="/carrito" className="navbar-cart-btn">
+                        🛒 Carrito
+                        {cantidadTotal > 0 && (
+                            <span className="navbar-cart-badge">{cantidadTotal}</span>
+                        )}
+                    </Link>
+                </div>
+
                 <button
                     className={`navbar-hamburger${menuOpen ? ' open' : ''}`}
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -266,11 +364,33 @@ function Header() {
                 </button>
             </header>
 
-            {/* MENÚ MÓVIL */}
             <nav className={`navbar-mobile-menu${menuOpen ? ' open' : ''}`}>
                 <Link to="/" className={isActive('/') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🏠 Inicio</Link>
                 <Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🎮 Catálogo</Link>
                 <Link to="/carrito" className={isActive('/carrito') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🛒 Carrito {cantidadTotal > 0 && `(${cantidadTotal})`}</Link>
+
+                {/* BOTÓN ADMIN EN LA VERSIÓN DE CELULAR */}
+                {isAdmin && (
+                    <Link to="/admin" className={isActive('/admin') ? 'active' : ''} onClick={() => setMenuOpen(false)} style={{ color: '#FFD700', textShadow: '0 0 8px rgba(255, 215, 0, 0.4)' }}>
+                        👑 Panel Admin
+                    </Link>
+                )}
+
+                <div style={{ height: '1px', background: 'linear-gradient(90deg, #00D4FF, #7B2FBE)', margin: '10px 0', opacity: '0.3' }}></div>
+
+                {usuario ? (
+                    <>
+                        <span style={{ color: '#FFFFFF', padding: '12px 0', fontWeight: 'bold' }}>👋 Hola, <span style={{ color: '#00D4FF' }}>{usuario.nombre}</span></span>
+                        <button
+                            onClick={() => { cerrarSesionCompleta(); setMenuOpen(false); }}
+                            style={{ background: 'transparent', border: '1px solid #FF006E', color: '#FF006E', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', marginTop: '5px' }}
+                        >
+                            Salir de la cuenta
+                        </button>
+                    </>
+                ) : (
+                    <Link to="/login" onClick={() => setMenuOpen(false)} style={{ color: '#00D4FF' }}>🔑 Iniciar Sesión</Link>
+                )}
             </nav>
         </>
     );

@@ -1,6 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { CartContext } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 const carritoStyles = `
 .carrito-page {
@@ -332,13 +333,33 @@ const carritoStyles = `
 `;
 
 function Carrito() {
-    // Nos conectamos al cerebro global para sacar los datos del carrito
-    const { carrito, vaciarCarrito } = useContext(CartContext);
+    const { carrito, vaciarCarrito, eliminarDelCarrito, actualizarCantidad } = useContext(CartContext);
+    const { usuario } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-    // Calculamos el total de dinero a pagar
+    // NUEVO ESTADO PARA EL MENSAJE NEÓN
+    const [mensajeCheckout, setMensajeCheckout] = useState('');
+
     const total = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
     const subtotal = total;
     const envio = total > 0 ? 0 : 0;
+
+    const procesarPago = () => {
+        // Validación extra por si acaso
+        if (!usuario) {
+            navigate('/login');
+            return;
+        }
+
+        // En vez de alert(), usamos el estado elegante
+        setMensajeCheckout('Conectando con la pasarela segura... 💳');
+
+        // Simulamos la compra por ahora (luego conectaremos esto al API)
+        setTimeout(() => {
+            setMensajeCheckout('¡Orden registrada con éxito en la base de datos! 🎉');
+            vaciarCarrito();
+        }, 3000);
+    };
 
     return (
         <>
@@ -347,24 +368,20 @@ function Carrito() {
                 <h1 className="carrito-title">🛒 Tu Carrito de Compras</h1>
 
                 {carrito.length === 0 ? (
-                    /* ---- CARRITO VACÍO ---- */
                     <div className="carrito-vacio">
                         <span className="carrito-vacio-icon">🛒</span>
                         <h2 className="carrito-vacio-title">Tu carrito está vacío</h2>
                         <p className="carrito-vacio-sub">¿Qué esperas para agregar algo épico?</p>
-                        <Link to="/catalogo" className="btn-primary" style={{ marginTop: '8px' }}>
+                        <Link to="/catalogo" className="btn-primary" style={{ marginTop: '8px', padding: '10px 20px', background: '#00D4FF', color: 'black', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>
                             🎮 Ir a Comprar
                         </Link>
                     </div>
                 ) : (
-                    /* ---- CARRITO CON PRODUCTOS ---- */
                     <div className="carrito-layout">
 
-                        {/* Lista de items */}
                         <div className="carrito-items">
                             {carrito.map((item) => (
                                 <div key={item.id} className="carrito-item">
-                                    {/* Imagen */}
                                     <img
                                         src={item.imagenes && item.imagenes.length > 0
                                             ? item.imagenes[0].url
@@ -373,7 +390,6 @@ function Carrito() {
                                         className="carrito-item-img"
                                     />
 
-                                    {/* Info */}
                                     <div className="carrito-item-info">
                                         <h3 className="carrito-item-name">{item.nombre}</h3>
                                         <p className="carrito-item-unit">
@@ -381,26 +397,24 @@ function Carrito() {
                                         </p>
                                     </div>
 
-                                    {/* Controles de cantidad */}
                                     <div className="carrito-item-controls">
                                         <span style={{ fontSize: '0.8rem', color: '#A0ADB8', fontFamily: 'Inter, sans-serif' }}>Cant:</span>
+                                        <button onClick={() => actualizarCantidad(item.id, item.cantidad - 1)} className="carrito-qty-btn">-</button>
                                         <span className="carrito-qty-num">{item.cantidad}</span>
+                                        <button onClick={() => actualizarCantidad(item.id, item.cantidad + 1)} className="carrito-qty-btn">+</button>
                                     </div>
 
-                                    {/* Precio total del item */}
                                     <div className="carrito-item-price">
                                         ${(item.precio * item.cantidad).toFixed(2)}
                                     </div>
 
-                                    {/* Botón eliminar (usa vaciarCarrito parcial no disponible, muestra opción visual) */}
-                                    <button className="carrito-remove-btn">
+                                    <button onClick={() => eliminarDelCarrito(item.id)} className="carrito-remove-btn">
                                         ✕
                                     </button>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Resumen del pedido */}
                         <div className="carrito-resumen">
                             <h2 className="carrito-resumen-title">Resumen del Pedido</h2>
 
@@ -426,8 +440,27 @@ function Carrito() {
                                 <span className="resumen-total-value">${(total + envio).toFixed(2)}</span>
                             </div>
 
+                            {/* ESTE ES EL MENSAJE NEÓN ELEGANTE (Sale justo arriba del botón cuando compran) */}
+                            {mensajeCheckout && (
+                                <div style={{
+                                    background: 'rgba(0, 212, 255, 0.1)',
+                                    border: '1px solid #00D4FF',
+                                    color: '#00D4FF',
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    marginBottom: '15px',
+                                    textAlign: 'center',
+                                    fontFamily: 'Inter, sans-serif',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                    animation: 'pulse-neon 2s infinite'
+                                }}>
+                                    {mensajeCheckout}
+                                </div>
+                            )}
+
                             <button
-                                onClick={() => alert('¡Compra simulada con éxito, compai!')}
+                                onClick={procesarPago}
                                 className="resumen-btn-pago"
                             >
                                 💳 PROCEDER AL PAGO
