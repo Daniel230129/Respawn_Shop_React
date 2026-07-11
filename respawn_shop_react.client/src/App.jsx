@@ -12,6 +12,8 @@ import Registro from './pages/Registro';
 import AdminDashboard from './pages/AdminDashboard'
 import AdminInventario from './pages/AdminInventario';
 import AdminAgregarProducto from './pages/AdminAgregarProducto';
+import MisPedidos from './pages/MisPedidos';
+import AdminPedidos from './pages/AdminPedidos';
 
 import './App.css';
 
@@ -32,6 +34,8 @@ function App() {
                             <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="/admin/inventario" element={<AdminInventario />} />
                             <Route path="/admin/agregar-producto" element={<AdminAgregarProducto />} />
+                            <Route path="/admin/pedidos" element={<AdminPedidos />} />
+                            <Route path="/mis-pedidos" element={<MisPedidos />} />
                         </Routes>
                     </Layout>
                 </Router>

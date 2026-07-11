@@ -40,10 +40,13 @@ function AdminDashboard() {
                 <div style={{ background: '#111128', border: '1px solid #1e1e3f', padding: '30px', borderRadius: '16px', textAlign: 'center' }}>
                     <h2 style={{ fontSize: '3rem', margin: '0 0 15px 0' }}>🧾</h2>
                     <h3 style={{ fontFamily: 'Orbitron', marginBottom: '10px' }}>Pedidos</h3>
-                    <p style={{ color: '#A0ADB8', fontSize: '0.9rem', marginBottom: '20px' }}>Ver las compras realizadas por los clientes.</p>
-                    <button style={{ width: '100%', background: 'transparent', color: '#00D4FF', border: '2px solid #00D4FF', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-                        Ver Historial
-                    </button>
+                    <p style={{ color: '#A0ADB8', fontSize: '0.9rem', marginBottom: '20px' }}>Ver y gestionar las compras realizadas por los clientes.</p>
+                    <Link
+                        to="/admin/pedidos"
+                        style={{ display: 'block', width: '100%', background: 'linear-gradient(135deg, #FF006E, #7B2FBE)', color: 'white', textDecoration: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxSizing: 'border-box' }}
+                    >
+                        Gestionar Pedidos
+                    </Link>
                 </div>
 
             </div>

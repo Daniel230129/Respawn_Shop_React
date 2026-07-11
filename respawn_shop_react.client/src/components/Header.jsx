@@ -322,6 +322,9 @@ function Header() {
                         <li><Link to="/" className={isActive('/') ? 'active' : ''}>Inicio</Link></li>
                         <li><Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''}>Catálogo</Link></li>
                         <li><Link to="/carrito" className={isActive('/carrito') ? 'active' : ''}>Carrito</Link></li>
+                        {usuario && (
+                            <li><Link to="/mis-pedidos" className={isActive('/mis-pedidos') ? 'active' : ''}>📦 Mis Pedidos</Link></li>
+                        )}
 
                         {/* 3. LÓGICA CONDICIONAL: SOLO APARECE SI ES ADMIN */}
                         {isAdmin && (
@@ -368,6 +371,9 @@ function Header() {
                 <Link to="/" className={isActive('/') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🏠 Inicio</Link>
                 <Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🎮 Catálogo</Link>
                 <Link to="/carrito" className={isActive('/carrito') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🛒 Carrito {cantidadTotal > 0 && `(${cantidadTotal})`}</Link>
+                {usuario && (
+                    <Link to="/mis-pedidos" className={isActive('/mis-pedidos') ? 'active' : ''} onClick={() => setMenuOpen(false)}>📦 Mis Pedidos</Link>
+                )}
 
                 {/* BOTÓN ADMIN EN LA VERSIÓN DE CELULAR */}
                 {isAdmin && (

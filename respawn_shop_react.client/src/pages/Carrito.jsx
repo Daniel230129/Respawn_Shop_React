@@ -344,21 +344,58 @@ function Carrito() {
     const subtotal = total;
     const envio = total > 0 ? 0 : 0;
 
-    const procesarPago = () => {
-        // Validación extra por si acaso
+    const procesarPago = async () => {
         if (!usuario) {
             navigate('/login');
             return;
         }
 
-        // En vez de alert(), usamos el estado elegante
         setMensajeCheckout('Conectando con la pasarela segura... 💳');
 
-        // Simulamos la compra por ahora (luego conectaremos esto al API)
-        setTimeout(() => {
-            setMensajeCheckout('¡Orden registrada con éxito en la base de datos! 🎉');
-            vaciarCarrito();
-        }, 3000);
+        try {
+            const token = localStorage.getItem('token');
+
+            // Extraemos el UsuarioId del JWT
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const usuarioId = parseInt(
+                payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+                || payload.nameid
+                || payload.sub
+                || '0'
+            );
+
+            const pedido = {
+                usuarioId: usuarioId,
+                totalPagado: total,
+                estado: 'Pendiente'
+            };
+
+            const detalles = carrito.map(item => ({
+                productoId: item.id,
+                cantidad: item.cantidad,
+                precioUnitario: item.precio
+            }));
+
+            const response = await fetch('https://localhost:7284/api/Pedidos/procesar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ pedido, carrito: detalles })
+            });
+
+            if (response.ok) {
+                setMensajeCheckout('¡Orden registrada con éxito! 🎉 Redirigiendo...');
+                vaciarCarrito();
+                setTimeout(() => navigate('/mis-pedidos'), 2000);
+            } else {
+                setMensajeCheckout('Error al procesar el pago. Intenta de nuevo ❌');
+            }
+        } catch (err) {
+            console.error(err);
+            setMensajeCheckout('Error de conexión con el servidor 🚨');
+        }
     };
 
     return (

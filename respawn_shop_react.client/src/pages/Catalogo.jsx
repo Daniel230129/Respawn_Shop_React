@@ -168,6 +168,8 @@ const catalogoStyles = `
 }
 `;
 
+const PRODUCTOS_POR_PAGINA = 12;
+
 function Catalogo() {
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
@@ -175,6 +177,8 @@ function Catalogo() {
     const [error, setError] = useState(null);
     const [categoriaActiva, setCategoriaActiva] = useState(null);
     const [busqueda, setBusqueda] = useState('');
+    const [filtroTipo, setFiltroTipo] = useState(null); // null = todos, 'digital', 'fisico'
+    const [cantidadVisible, setCantidadVisible] = useState(PRODUCTOS_POR_PAGINA);
 
     const { agregarAlCarrito } = useContext(CartContext);
     const { usuario } = useContext(AuthContext); // <-- Extraemos al usuario
@@ -249,8 +253,23 @@ function Catalogo() {
     const productosFiltrados = productos.filter(p => {
         const matchBusqueda = p.nombre?.toLowerCase().includes(busqueda.toLowerCase());
         const matchCategoria = categoriaActiva === null || p.categoriaId === categoriaActiva;
-        return matchBusqueda && matchCategoria;
+        const matchTipo = filtroTipo === null
+            ? true
+            : filtroTipo === 'digital'
+                ? p.esDigital === true
+                : p.esDigital === false;
+        return matchBusqueda && matchCategoria && matchTipo;
     });
+
+    const productosVisibles = productosFiltrados.slice(0, cantidadVisible);
+    const hayMas = cantidadVisible < productosFiltrados.length;
+
+    const cargarMas = () => setCantidadVisible(prev => prev + PRODUCTOS_POR_PAGINA);
+
+    // Resetear paginación cuando cambia algún filtro
+    const cambiarCategoria = (id) => { setCategoriaActiva(id); setCantidadVisible(PRODUCTOS_POR_PAGINA); };
+    const cambiarBusqueda = (val) => { setBusqueda(val); setCantidadVisible(PRODUCTOS_POR_PAGINA); };
+    const cambiarTipo = (tipo) => { setFiltroTipo(prev => prev === tipo ? null : tipo); setCantidadVisible(PRODUCTOS_POR_PAGINA); };
 
     return (
         <>
@@ -265,7 +284,7 @@ function Catalogo() {
                 <div className="catalogo-filters">
                     <button
                         className={`filter-chip${categoriaActiva === null ? ' active' : ''}`}
-                        onClick={() => setCategoriaActiva(null)}
+                        onClick={() => cambiarCategoria(null)}
                     >
                         Todos
                     </button>
@@ -274,7 +293,7 @@ function Catalogo() {
                         <button
                             key={cat.id}
                             className={`filter-chip${categoriaActiva === cat.id ? ' active' : ''}`}
-                            onClick={() => setCategoriaActiva(cat.id)}
+                            onClick={() => cambiarCategoria(cat.id)}
                         >
                             {cat.nombre}
                         </button>
@@ -286,13 +305,37 @@ function Catalogo() {
                             type="text"
                             placeholder="Buscar producto..."
                             value={busqueda}
-                            onChange={(e) => setBusqueda(e.target.value)}
+                            onChange={(e) => cambiarBusqueda(e.target.value)}
                         />
+                    </div>
+
+                    {/* Filtro Físico / Digital — lado derecho */}
+                    <div style={{ display: 'flex', gap: '8px', marginLeft: '8px', flexShrink: 0 }}>
+                        <button
+                            className={`filter-chip${filtroTipo === 'fisico' ? ' active' : ''}`}
+                            onClick={() => cambiarTipo('fisico')}
+                            style={filtroTipo === 'fisico' ? { background: 'linear-gradient(135deg, #00FF88, #00D4FF)', borderColor: 'transparent', color: '#060612' } : {}}
+                        >
+                            🗃️ Físico
+                        </button>
+                        <button
+                            className={`filter-chip${filtroTipo === 'digital' ? ' active' : ''}`}
+                            onClick={() => cambiarTipo('digital')}
+                            style={filtroTipo === 'digital' ? { background: 'linear-gradient(135deg, #7B2FBE, #00D4FF)', borderColor: 'transparent', color: '#FFFFFF' } : {}}
+                        >
+                            💿 Digital
+                        </button>
                     </div>
                 </div>
 
+                {/* Contador de resultados */}
+                <div style={{ fontFamily: 'Inter, sans-serif', color: '#A0ADB8', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                    Mostrando <strong style={{ color: '#00D4FF' }}>{Math.min(cantidadVisible, productosFiltrados.length)}</strong> de <strong style={{ color: '#FFFFFF' }}>{productosFiltrados.length}</strong> productos
+                    {filtroTipo && <span style={{ marginLeft: '8px', color: filtroTipo === 'digital' ? '#7B2FBE' : '#00FF88' }}>• {filtroTipo === 'digital' ? '💿 Solo Digital' : '🗃️ Solo Físico'}</span>}
+                </div>
+
                 <div className="catalogo-grid">
-                    {productosFiltrados.map((producto) => (
+                    {productosVisibles.map((producto) => (
                         <div key={producto.id} className="product-card">
                             <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                                 <div className="product-card-img-wrapper">
@@ -340,14 +383,21 @@ function Catalogo() {
                     <div style={{ textAlign: 'center', padding: '4rem', color: '#A0ADB8' }}>
                         <p style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</p>
                         <p style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '1.1rem' }}>No se encontraron productos</p>
+                        {filtroTipo && <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Prueba desactivando el filtro de {filtroTipo === 'digital' ? 'Digital' : 'Físico'}</p>}
                     </div>
                 )}
 
-                {productosFiltrados.length > 0 && (
+                {hayMas && (
                     <div className="catalogo-footer">
-                        <button className="btn-secondary">
-                            Cargar Más Productos ↓
+                        <button className="btn-secondary" onClick={cargarMas}>
+                            Cargar Más Productos ({productosFiltrados.length - cantidadVisible} restantes) ↓
                         </button>
+                    </div>
+                )}
+
+                {!hayMas && productosFiltrados.length > PRODUCTOS_POR_PAGINA && (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: '#A0ADB8', fontFamily: 'Inter, sans-serif', fontSize: '0.9rem' }}>
+                        ✓ Has visto todos los productos
                     </div>
                 )}
             </div>
