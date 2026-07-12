@@ -60,22 +60,27 @@ function Login() {
 
                 // 1. Abrimos el token para ver qué tiene adentro
                 const datosDesencriptados = decodificarJWT(token);
-                console.log("Token decodificado:", datosDesencriptados);
 
-                // 2. Buscamos el Rol (.NET lo suele guardar con este nombre largo o como 'role')
+                // 2. Extraemos TODO lo que necesitamos (Nombre, Rol y el ID oculto)
                 const rolDelUsuario = datosDesencriptados['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || datosDesencriptados.role || datosDesencriptados.rol || 'Cliente';
+                const nombreUsuario = datosDesencriptados.unique_name || email.split('@')[0];
+
+                // .NET guarda el ID aquí casi siempre:
+                const idDelUsuario = datosDesencriptados['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || datosDesencriptados.nameid || datosDesencriptados.sub || datosDesencriptados.id || null;
 
                 // 3. Guardamos el rol en el LocalStorage
                 localStorage.setItem('rol', rolDelUsuario);
 
-                // 4. Mandamos el nombre (o el correo si no hay nombre) al Header
-                const nombreUsuario = datosDesencriptados.unique_name || email.split('@')[0];
-
-                login({ nombre: nombreUsuario }, token);
+                // 4. AQUÍ ESTÁ LA SOLUCIÓN: Pasamos el objeto completo al AuthContext
+                login({
+                    id: idDelUsuario,
+                    nombre: nombreUsuario,
+                    rol: rolDelUsuario
+                }, token);
 
                 // Si es admin lo mandamos a su panel, si es cliente al inicio
                 if (rolDelUsuario === 'Administrador') {
-                    navigate('/admin');
+                    navigate('/admin/inventario'); // Te cambié la ruta para que caiga directo en una válida
                 } else {
                     navigate('/');
                 }

@@ -14,6 +14,8 @@ import AdminInventario from './pages/AdminInventario';
 import AdminAgregarProducto from './pages/AdminAgregarProducto';
 import MisPedidos from './pages/MisPedidos';
 import AdminPedidos from './pages/AdminPedidos';
+import AdminEditarProducto from './pages/AdminEditarProducto';
+import RutaProtegida from './components/RutaProtegida';
 
 import './App.css';
 
@@ -31,10 +33,33 @@ function App() {
                             <Route path="/producto/:id" element={<ProductoDetalle />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/registro" element={<Registro />} />
-                            <Route path="/admin" element={<AdminDashboard />} />
-                            <Route path="/admin/inventario" element={<AdminInventario />} />
-                            <Route path="/admin/agregar-producto" element={<AdminAgregarProducto />} />
-                            <Route path="/admin/pedidos" element={<AdminPedidos />} />
+                            <Route path="/admin" element={
+                                <RutaProtegida requireAdmin={true}>
+                                    <AdminDashboard />
+                                </RutaProtegida>
+                            } />
+
+                            <Route path="/admin/inventario" element={
+                                <RutaProtegida requireAdmin={true}>
+                                    <AdminInventario />
+                                </RutaProtegida>
+                            } />
+                            <Route path="/admin/agregar-producto" element={
+                                <RutaProtegida requireAdmin={true}>
+                                    <AdminAgregarProducto />
+                                </RutaProtegida>
+                            } />
+                            <Route path="/admin/pedidos" element={
+                                <RutaProtegida requireAdmin={true}>
+                                    <AdminPedidos />
+                                </RutaProtegida>
+                            } />
+                            <Route path="/admin/editar-producto/:id" element={
+                                <RutaProtegida requireAdmin={true}>
+                                    <AdminEditarProducto />
+                                </RutaProtegida>
+                            } />
+
                             <Route path="/mis-pedidos" element={<MisPedidos />} />
                         </Routes>
                     </Layout>

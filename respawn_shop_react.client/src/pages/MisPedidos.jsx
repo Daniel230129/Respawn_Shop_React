@@ -208,29 +208,39 @@ const estadoClass = (estado) => {
 function MisPedidos() {
     const [pedidos, setPedidos] = useState([]);
     const [cargando, setCargando] = useState(true);
+
+    // Extraemos el usuario directamente del contexto
     const { usuario } = useContext(AuthContext);
 
     useEffect(() => {
         const cargarPedidos = async () => {
+            // Si no hay usuario cargado en el contexto, no hacemos la petición
+            if (!usuario || !usuario.id) {
+                setCargando(false);
+                return;
+            }
+
             try {
                 const token = localStorage.getItem('token');
-                if (!token) return;
 
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const usuarioId = parseInt(
-                    payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-                    || payload.nameid
-                    || payload.sub
-                    || '0'
-                );
-
-                const res = await fetch(`https://localhost:7284/api/Pedidos/usuario/${usuarioId}`, {
+                // 1. AHORA SÍ: Apuntamos a la ruta general que existe en tu .NET
+                const res = await fetch(`https://localhost:7284/api/Pedidos`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (res.ok) {
-                    const data = await res.json();
-                    setPedidos(data);
+                    const todosLosPedidos = await res.json();
+
+                    // 2. EL TRUCO MÁGICO: Filtramos en React para que solo vea los suyos
+                    // Usamos Number() por si el ID viene como texto en un lado y como número en otro
+                    const misPedidosFiltrados = todosLosPedidos.filter(
+                        pedido => Number(pedido.usuarioId) === Number(usuario.id)
+                    );
+
+                    setPedidos(misPedidosFiltrados);
+
+                } else if (res.status === 404) {
+                    setPedidos([]);
                 }
             } catch (err) {
                 console.error('Error cargando pedidos:', err);
@@ -240,7 +250,7 @@ function MisPedidos() {
         };
 
         cargarPedidos();
-    }, []);
+    }, [usuario]);
 
     if (cargando) return (
         <>
@@ -251,6 +261,8 @@ function MisPedidos() {
             </div>
         </>
     );
+
+    const imagenPorDefecto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%230a0a1a'/%3E%3Ctext x='50%25' y='50%25' font-size='40' text-anchor='middle' dy='.3em'%3E%F0%9F%8E%AE%3C/text%3E%3C/svg%3E";
 
     return (
         <>
@@ -270,7 +282,7 @@ function MisPedidos() {
                         <p style={{ color: '#A0ADB8', fontFamily: 'Inter, sans-serif', marginBottom: '1.5rem' }}>
                             ¡Explora el catálogo y haz tu primera compra!
                         </p>
-                        <Link to="/catalogo" className="btn-primary">🎮 Ir al Catálogo</Link>
+                        <Link to="/catalogo" className="btn-primary" style={{ background: '#00D4FF', color: '#000', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold' }}>🎮 Ir al Catálogo</Link>
                     </div>
                 ) : (
                     pedidos.map(pedido => (
@@ -294,10 +306,13 @@ function MisPedidos() {
                                 {pedido.detalles?.map(det => (
                                     <div key={det.id} className="pedido-item">
                                         <img
-                                            src={det.producto?.imagenes?.[0]?.url
-                                                || 'https://via.placeholder.com/56x56?text=🎮'}
+                                            src={det.producto?.imagenes?.[0]?.url || imagenPorDefecto}
                                             alt={det.producto?.nombre}
                                             className="pedido-item-img"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = imagenPorDefecto;
+                                            }}
                                         />
                                         <div className="pedido-item-info">
                                             <div className="pedido-item-nombre">

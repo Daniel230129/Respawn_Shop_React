@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-// Mismos estilos
 const authStyles = `
 .auth-page { display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 2rem; }
 .auth-card { background: #111128; border: 1px solid #1e1e3f; border-radius: 16px; padding: 3rem; width: 100%; max-width: 450px; box-shadow: 0 0 30px rgba(0,212,255,0.05); text-align: center; position: relative; overflow: hidden; }
@@ -24,22 +23,23 @@ function Registro() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [mensaje, setMensaje] = useState('');
+    const [exito, setExito] = useState(''); // ESTADO PARA EL MENSAJE DE ÉXITO
 
     const navigate = useNavigate();
 
     const manejarSubmit = async (e) => {
         e.preventDefault();
         setMensaje('');
+        setExito('');
 
-        // Armamos el JSON exactamente como lo pide Swagger
         const payload = {
             id: 0,
             nombre: nombre,
-            apellido: "Usuario", // Dato genérico para no dañar el form
+            apellido: "Usuario",
             correo: email,
-            passwordHash: password, // Asumimos que tu .NET lo encripta al recibirlo
-            direccionEnvio: "Sin especificar", // Dato genérico
-            rol: "Cliente" // Rol por defecto
+            passwordHash: password,
+            direccionEnvio: "Sin especificar",
+            rol: "Cliente"
         };
 
         try {
@@ -50,8 +50,11 @@ function Registro() {
             });
 
             if (response.ok) {
-                alert('¡Registro exitoso! Ya puedes iniciar sesión. 🎉');
-                navigate('/login'); // Lo mandamos a logearse
+                // AQUÍ REEMPLAZAMOS EL ALERT FEO
+                setExito('🎉 ¡Registro exitoso! Llevándote al login...');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
             } else {
                 setMensaje('Hubo un error al registrar. El correo podría estar en uso.');
             }
@@ -69,7 +72,9 @@ function Registro() {
                     <h2 className="auth-title">Crear Cuenta</h2>
                     <p className="auth-subtitle">Únete a la comunidad de Respawn Shop</p>
 
+                    {/* CAJAS DE MENSAJES */}
                     {mensaje && <div style={{ backgroundColor: 'rgba(255, 0, 110, 0.1)', border: '1px solid #FF006E', color: '#FF006E', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontWeight: 'bold' }}>{mensaje}</div>}
+                    {exito && <div style={{ backgroundColor: 'rgba(0, 255, 136, 0.1)', border: '1px solid #00FF88', color: '#00FF88', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontWeight: 'bold' }}>{exito}</div>}
 
                     <form onSubmit={manejarSubmit}>
                         <div className="input-group">

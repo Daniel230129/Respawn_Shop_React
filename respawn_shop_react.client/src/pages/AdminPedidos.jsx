@@ -263,6 +263,8 @@ function AdminPedidos() {
         </>
     );
 
+    const imagenAdminDefecto = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%231e1e3f'/%3E%3Ctext x='50%25' y='50%25' font-size='45' text-anchor='middle' dy='.3em'%3E%F0%9F%8E%AE%3C/text%3E%3C/svg%3E";
+
     return (
         <>
             <style>{styles}</style>
@@ -347,9 +349,13 @@ function AdminPedidos() {
                                             {pedido.detalles?.slice(0, 2).map(det => (
                                                 <div key={det.id} className="ap-producto-item">
                                                     <img
-                                                        src={det.producto?.imagenes?.[0]?.url || 'https://via.placeholder.com/32?text=🎮'}
+                                                        src={det.producto?.imagenes?.[0]?.url || imagenAdminDefecto}
                                                         alt=""
                                                         className="ap-producto-img"
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = imagenAdminDefecto;
+                                                        }}
                                                     />
                                                     <span>{det.producto?.nombre}</span>
                                                     <span style={{ color: '#A0ADB8' }}>×{det.cantidad}</span>

@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useContext } from 'react';
 import { CartContext } from '../context/CartContext';
-import { AuthContext } from '../context/AuthContext'; // <-- Importamos el cerebro
+import { AuthContext } from '../context/AuthContext';
 
 const catalogoStyles = `
 .catalogo-page {
@@ -177,16 +177,14 @@ function Catalogo() {
     const [error, setError] = useState(null);
     const [categoriaActiva, setCategoriaActiva] = useState(null);
     const [busqueda, setBusqueda] = useState('');
-    const [filtroTipo, setFiltroTipo] = useState(null); // null = todos, 'digital', 'fisico'
+    const [filtroTipo, setFiltroTipo] = useState(null);
     const [cantidadVisible, setCantidadVisible] = useState(PRODUCTOS_POR_PAGINA);
 
     const { agregarAlCarrito } = useContext(CartContext);
-    const { usuario } = useContext(AuthContext); // <-- Extraemos al usuario
-    const navigate = useNavigate(); // <-- Instanciamos la navegación
-
+    const { usuario } = useContext(AuthContext);
+    const navigate = useNavigate();
     const location = useLocation();
 
-    // NUEVA FUNCIÓN: Redirección suave
     const intentarAgregar = (producto) => {
         if (!usuario) {
             navigate('/login');
@@ -266,7 +264,6 @@ function Catalogo() {
 
     const cargarMas = () => setCantidadVisible(prev => prev + PRODUCTOS_POR_PAGINA);
 
-    // Resetear paginación cuando cambia algún filtro
     const cambiarCategoria = (id) => { setCategoriaActiva(id); setCantidadVisible(PRODUCTOS_POR_PAGINA); };
     const cambiarBusqueda = (val) => { setBusqueda(val); setCantidadVisible(PRODUCTOS_POR_PAGINA); };
     const cambiarTipo = (tipo) => { setFiltroTipo(prev => prev === tipo ? null : tipo); setCantidadVisible(PRODUCTOS_POR_PAGINA); };
@@ -309,7 +306,6 @@ function Catalogo() {
                         />
                     </div>
 
-                    {/* Filtro Físico / Digital — lado derecho */}
                     <div style={{ display: 'flex', gap: '8px', marginLeft: '8px', flexShrink: 0 }}>
                         <button
                             className={`filter-chip${filtroTipo === 'fisico' ? ' active' : ''}`}
@@ -328,55 +324,71 @@ function Catalogo() {
                     </div>
                 </div>
 
-                {/* Contador de resultados */}
                 <div style={{ fontFamily: 'Inter, sans-serif', color: '#A0ADB8', fontSize: '0.85rem', marginBottom: '1rem' }}>
                     Mostrando <strong style={{ color: '#00D4FF' }}>{Math.min(cantidadVisible, productosFiltrados.length)}</strong> de <strong style={{ color: '#FFFFFF' }}>{productosFiltrados.length}</strong> productos
                     {filtroTipo && <span style={{ marginLeft: '8px', color: filtroTipo === 'digital' ? '#7B2FBE' : '#00FF88' }}>• {filtroTipo === 'digital' ? '💿 Solo Digital' : '🗃️ Solo Físico'}</span>}
                 </div>
 
                 <div className="catalogo-grid">
-                    {productosVisibles.map((producto) => (
-                        <div key={producto.id} className="product-card">
-                            <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                                <div className="product-card-img-wrapper">
-                                    <img
-                                        src={producto.imagenes && producto.imagenes.length > 0
-                                            ? producto.imagenes[0].url
-                                            : 'https://via.placeholder.com/250x200?text=Sin+Imagen'}
-                                        alt={producto.nombre}
-                                    />
-                                    {producto.stock < 5 && (
-                                        <span className="badge badge-oferta">OFERTA</span>
-                                    )}
-                                    {producto.stock >= 5 && producto.stock < 10 && (
-                                        <span className="badge badge-nuevo">NUEVO</span>
-                                    )}
-                                </div>
-                            </Link>
+                    {productosVisibles.map((producto) => {
+                        const sinStock = producto.stock <= 0; // Calculamos si no hay stock
 
-                            <div className="product-card-body">
-                                <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                    <h3 className="product-card-title">{producto.nombre}</h3>
+                        return (
+                            <div key={producto.id} className="product-card">
+                                <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                                    <div className="product-card-img-wrapper" style={sinStock ? { opacity: 0.6, filter: 'grayscale(0.8)' } : {}}>
+                                        <img
+                                            src={producto.imagenes && producto.imagenes.length > 0
+                                                ? producto.imagenes[0].url
+                                                : 'https://via.placeholder.com/250x200?text=Sin+Imagen'}
+                                            alt={producto.nombre}
+                                        />
+
+                                        {/* Insignia de Agotado Prioritaria */}
+                                        {sinStock ? (
+                                            <span className="badge" style={{ background: '#FF006E', color: 'white' }}>AGOTADO</span>
+                                        ) : producto.stock < 5 ? (
+                                            <span className="badge badge-oferta">OFERTA</span>
+                                        ) : producto.stock >= 5 && producto.stock < 10 ? (
+                                            <span className="badge badge-nuevo">NUEVO</span>
+                                        ) : null}
+                                    </div>
                                 </Link>
 
-                                <span className={`product-card-stock ${producto.stock < 5 ? 'ultimas' : 'disponible'}`}>
-                                    {producto.stock < 5
-                                        ? `⚠️ ¡Últimas ${producto.stock} uds.!`
-                                        : `✓ Stock: ${producto.stock} uds.`}
-                                </span>
+                                <div className="product-card-body">
+                                    <Link to={`/producto/${producto.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <h3 className="product-card-title">{producto.nombre}</h3>
+                                    </Link>
 
-                                <span className="product-card-price">${producto.precio?.toFixed(2)}</span>
+                                    <span className={`product-card-stock ${sinStock ? 'agotado' : producto.stock < 5 ? 'ultimas' : 'disponible'}`} style={sinStock ? { color: '#FF006E' } : {}}>
+                                        {sinStock
+                                            ? '❌ Sin Stock'
+                                            : producto.stock < 5
+                                                ? `⚠️ ¡Últimas ${producto.stock} uds.!`
+                                                : `✓ Stock: ${producto.stock} uds.`}
+                                    </span>
 
-                                {/* PROTEGEMOS EL BOTÓN */}
-                                <button
-                                    onClick={() => intentarAgregar(producto)}
-                                    className="product-card-btn"
-                                >
-                                    🛒 Añadir al Carrito
-                                </button>
+                                    <span className="product-card-price">${producto.precio?.toFixed(2)}</span>
+
+                                    {/* BOTÓN CON CONDICIONAL DE STOCK */}
+                                    <button
+                                        onClick={() => intentarAgregar(producto)}
+                                        className="product-card-btn"
+                                        disabled={sinStock}
+                                        style={sinStock ? {
+                                            background: 'rgba(255, 0, 110, 0.1)',
+                                            color: '#FF006E',
+                                            borderColor: '#FF006E',
+                                            cursor: 'not-allowed',
+                                            opacity: 0.8
+                                        } : {}}
+                                    >
+                                        {sinStock ? '❌ Agotado' : '🛒 Añadir al Carrito'}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {productosFiltrados.length === 0 && (

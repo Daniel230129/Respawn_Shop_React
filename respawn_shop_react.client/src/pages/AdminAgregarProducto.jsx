@@ -282,33 +282,41 @@ function AdminAgregarProducto() {
                 try {
                     const json = JSON.parse(data);
 
-                    // Llenamos TODO lo que la IA haya traído
-                    if (json.descripcion) setDescripcion(json.descripcion);
-                    if (json.precio) setPrecio(json.precio);
-                    if (json.stock) setStock(json.stock);
-                    if (json.generos || json.genero) setGenero(json.generos || json.genero);
-                    if (json.requisitos || json.requisitosSistema) setRequisitosSistema(json.requisitos || json.requisitosSistema);
-                    if (json.imagenUrl || json.foto || json.imagen) setImagenUrl(json.imagenUrl || json.foto || json.imagen);
+                    // --- MAPEAMOS EXACTAMENTE LOS NOMBRES DEL JSON ---
 
-                    // Asignar si es físico o digital
-                    if (json.esDigital !== undefined) {
-                        setEsDigital(json.esDigital);
-                    } else if (json.tipo) {
-                        setEsDigital(String(json.tipo).toLowerCase().includes('digital'));
+                    if (json.descripcion) setDescripcion(json.descripcion);
+
+                    // El precio viene como "precioSugerido"
+                    if (json.precioSugerido) setPrecio(json.precioSugerido);
+
+                    if (json.genero) setGenero(json.genero);
+                    if (json.requisitosSistema) setRequisitosSistema(json.requisitosSistema);
+
+                    // Tipo físico/digital
+                    if (json.esDigital !== undefined) setEsDigital(json.esDigital);
+
+                    // La imagen viene dentro de una lista llamada "imagenesSugeridas"
+                    if (json.imagenesSugeridas && json.imagenesSugeridas.length > 0) {
+                        setImagenUrl(json.imagenesSugeridas[0]); // Agarramos la primera imagen de la lista
+                    } else if (json.imagenUrl) {
+                        setImagenUrl(json.imagenUrl);
                     }
 
-                    // Intentar asginar la categoría automáticamente si la IA la devolvió
-                    if (json.categoria || json.categoriaId) {
-                        const categoriaAI = String(json.categoria || json.categoriaId).toLowerCase();
-                        const categoriaCoincidente = categorias.find(c =>
-                            c.nombre.toLowerCase().includes(categoriaAI) || String(c.id) === categoriaAI
+                    // Mapeo inteligente de la "categoriaSugerida"
+                    if (json.categoriaSugerida) {
+                        const catAIAntes = json.categoriaSugerida.toLowerCase();
+                        // Buscamos si "Videojuegos" coincide con "Juegos" o algo similar en tu base de datos local
+                        const categoriaMatch = categorias.find(c =>
+                            c.nombre.toLowerCase().includes(catAIAntes) ||
+                            catAIAntes.includes(c.nombre.toLowerCase())
                         );
-                        if (categoriaCoincidente) setCategoriaId(categoriaCoincidente.id);
+                        if (categoriaMatch) {
+                            setCategoriaId(categoriaMatch.id);
+                        }
                     }
 
                     mostrarAlerta('✨ ¡Formulario autocompletado con éxito!', 'success');
                 } catch {
-                    // Por si acaso la IA solo devuelve texto plano
                     setDescripcion(data);
                     mostrarAlerta('✨ ¡Descripción generada con éxito!', 'success');
                 }

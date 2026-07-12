@@ -96,7 +96,7 @@ const navbarStyles = `
 
 /* --- ESTILOS PARA EL BOTÓN DE ADMIN --- */
 .navbar-nav a.admin-link {
-    color: #FFD700; /* Dorado */
+    color: #FFD700;
     text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
 }
 .navbar-nav a.admin-link::after {
@@ -289,18 +289,16 @@ function Header() {
     const { carrito, vaciarCarrito } = useContext(CartContext);
     const { usuario, logout } = useContext(AuthContext);
 
-    // 1. LEEMOS EL ROL DIRECTAMENTE DE LA MEMORIA
     const isAdmin = localStorage.getItem('rol') === 'Administrador';
 
     const cantidadTotal = carrito.reduce((acc, item) => acc + item.cantidad, 0);
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
 
-    // 2. MODIFICAMOS LA SALIDA PARA BORRAR EL ROL Y QUE DESAPAREZCA EL BOTÓN
     const cerrarSesionCompleta = () => {
         vaciarCarrito();
         logout();
-        localStorage.removeItem('rol'); // ¡Súper importante para la seguridad!
+        localStorage.removeItem('rol');
     };
 
     const isActive = (path) =>
@@ -321,17 +319,16 @@ function Header() {
                     <ul className="navbar-nav">
                         <li><Link to="/" className={isActive('/') ? 'active' : ''}>Inicio</Link></li>
                         <li><Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''}>Catálogo</Link></li>
-                        <li><Link to="/carrito" className={isActive('/carrito') ? 'active' : ''}>Carrito</Link></li>
-                        {usuario && (
+
+                        {/* MIS PEDIDOS AHORA SOLO APARECE SI NO ES ADMIN */}
+                        {usuario && !isAdmin && (
                             <li><Link to="/mis-pedidos" className={isActive('/mis-pedidos') ? 'active' : ''}>📦 Mis Pedidos</Link></li>
                         )}
 
-                        {/* 3. LÓGICA CONDICIONAL: SOLO APARECE SI ES ADMIN */}
                         {isAdmin && (
                             <li>
-                                {/* Asegúrate de que este "to=" sea EXACTAMENTE como lo tienes en App.jsx */}
                                 <Link to="/admin" className={`admin-link ${isActive('/admin') ? 'active' : ''}`}>
-                                    👑 Panel Admin
+                                    Panel Admin
                                 </Link>
                             </li>
                         )}
@@ -370,12 +367,14 @@ function Header() {
             <nav className={`navbar-mobile-menu${menuOpen ? ' open' : ''}`}>
                 <Link to="/" className={isActive('/') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🏠 Inicio</Link>
                 <Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🎮 Catálogo</Link>
+
+                {/* En móvil sí dejamos el carrito porque el botón grande se oculta */}
                 <Link to="/carrito" className={isActive('/carrito') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🛒 Carrito {cantidadTotal > 0 && `(${cantidadTotal})`}</Link>
-                {usuario && (
+
+                {usuario && !isAdmin && (
                     <Link to="/mis-pedidos" className={isActive('/mis-pedidos') ? 'active' : ''} onClick={() => setMenuOpen(false)}>📦 Mis Pedidos</Link>
                 )}
 
-                {/* BOTÓN ADMIN EN LA VERSIÓN DE CELULAR */}
                 {isAdmin && (
                     <Link to="/admin" className={isActive('/admin') ? 'active' : ''} onClick={() => setMenuOpen(false)} style={{ color: '#FFD700', textShadow: '0 0 8px rgba(255, 215, 0, 0.4)' }}>
                         👑 Panel Admin
