@@ -250,7 +250,6 @@ function AdminPedidos() {
         ? pedidos
         : pedidos.filter(p => p.estado === filtroEstado);
 
-    // Estadísticas
     const stats = ESTADOS.map(e => ({ estado: e, count: pedidos.filter(p => p.estado === e).length }));
 
     if (cargando) return (
@@ -274,7 +273,6 @@ function AdminPedidos() {
                     {pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''} en total — Cambia el estado de cualquier pedido directamente desde aquí.
                 </p>
 
-                {/* Estadísticas */}
                 <div className="admin-pedidos-stats">
                     <div className="admin-stat-card">
                         <div className="admin-stat-num" style={{ color: '#FFFFFF' }}>{pedidos.length}</div>
@@ -288,7 +286,6 @@ function AdminPedidos() {
                     ))}
                 </div>
 
-                {/* Filtros */}
                 <div className="ap-filtro-bar">
                     <button
                         className={`ap-filtro-chip${filtroEstado === 'Todos' ? ' active' : ''}`}
@@ -308,7 +305,6 @@ function AdminPedidos() {
                     ))}
                 </div>
 
-                {/* Tabla */}
                 <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #1e1e3f' }}>
                     <table className="ap-tabla">
                         <thead>

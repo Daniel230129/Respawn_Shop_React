@@ -148,7 +148,6 @@ function Footer() {
             <style>{footerStyles}</style>
             <footer className="footer">
                 <div className="footer-inner">
-                    {/* LOGO */}
                     <div>
                         <Link to="/" className="footer-logo">
                             <span className="footer-logo-icon">🎮</span>
@@ -159,7 +158,6 @@ function Footer() {
                         </Link>
                     </div>
 
-                    {/* LINKS CATEGORÍAS */}
                     <nav className="footer-links">
                         <h4>Categorías</h4>
                         <Link to="/catalogo">Videojuegos</Link>
@@ -169,7 +167,6 @@ function Footer() {
                         <Link to="/catalogo">Accesorios</Link>
                     </nav>
 
-                    {/* LINKS TIENDA */}
                     <nav className="footer-links">
                         <h4>Tienda</h4>
                         <Link to="/">Inicio</Link>
@@ -177,7 +174,6 @@ function Footer() {
                         <Link to="/carrito">Carrito</Link>
                     </nav>
 
-                    {/* REDES SOCIALES */}
                     <div className="footer-socials">
                         <h4>Síguenos</h4>
                         <div className="footer-social-icons">

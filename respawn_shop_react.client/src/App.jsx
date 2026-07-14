@@ -21,7 +21,6 @@ import './App.css';
 
 function App() {
     return (
-        /* 2. ENVOLVEMOS TODA LA APLICACIÓN CON EL AUTHPROVIDER */
         <AuthProvider>
             <CartProvider>
                 <Router>

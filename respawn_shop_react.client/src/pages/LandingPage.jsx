@@ -299,7 +299,6 @@ function LandingPage() {
     const { agregarAlCarrito } = useContext(CartContext);
     const navigate = useNavigate();
 
-    // Jalamos los datos de tu API al cargar la página
     useEffect(() => {
         const fetchTendencias = async () => {
             try {
@@ -307,9 +306,7 @@ function LandingPage() {
                 if (!response.ok) throw new Error('Error al cargar');
                 const data = await response.json();
 
-                // Cortamos el arreglo para mostrar solo los primeros 3 juegos en el inicio
                 setProductosTendencia(data.slice(0, 3));
-                // Guardamos todos para las ofertas flash
                 setTodosProductos(data);
             } catch (error) {
                 console.error(error);
@@ -321,17 +318,14 @@ function LandingPage() {
         fetchTendencias();
     }, []);
 
-    // Navegar al catálogo con filtro de categoría preseleccionado
     const irACategoria = (categoria) => {
         navigate('/catalogo', { state: { categoriaInicial: categoria } });
     };
 
-    // Productos para las ofertas flash (los que tienen menos stock = más urgencia)
     const productosOferta = todosProductos
         .slice(0, 4)
         .map(p => ({ ...p, precioOriginal: (p.precio * 1.4).toFixed(2) }));
 
-    // Genera estrellas para el fondo del hero
     const stars = Array.from({ length: 30 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
@@ -346,9 +340,7 @@ function LandingPage() {
         <>
             <style>{landingStyles}</style>
 
-            {/* ===== 1. HERO BANNER ===== */}
             <section className="hero">
-                {/* Partículas/estrellas */}
                 <div className="hero-stars">
                     {stars.map(star => (
                         <div
@@ -382,7 +374,6 @@ function LandingPage() {
                 </div>
             </section>
 
-            {/* ===== 2. CATEGORÍAS RÁPIDAS ===== */}
             <section className="section-categories">
                 <h2 className="section-title">Explorar por Categoría</h2>
                 <div className="categories-grid">
@@ -405,7 +396,6 @@ function LandingPage() {
                 </div>
             </section>
 
-            {/* ===== 3. TENDENCIAS / DATOS REALES ===== */}
             <section className="section-trending">
                 <h2 className="section-title">🔥 Lo Más Jugado Esta Semana</h2>
 
@@ -458,7 +448,6 @@ function LandingPage() {
                 )}
             </section>
 
-            {/* ===== 4. BANNER OFERTA ESPECIAL ===== */}
             <section className="section-offer-banner">
                 <div className="offer-banner-inner">
                     <h2 className="offer-banner-title">¿Buscas un descuento especial? ⚡</h2>
@@ -471,7 +460,6 @@ function LandingPage() {
                     </button>
                 </div>
 
-                {/* PRODUCTOS EN OFERTA - se despliegan al presionar el botón */}
                 {mostrarOfertas && (
                     <div style={{
                         maxWidth: '1200px',

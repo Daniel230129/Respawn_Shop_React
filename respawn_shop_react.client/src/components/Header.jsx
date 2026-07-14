@@ -94,7 +94,6 @@ const navbarStyles = `
     width: 70%;
 }
 
-/* --- ESTILOS PARA EL BOTÓN DE ADMIN --- */
 .navbar-nav a.admin-link {
     color: #FFD700;
     text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
@@ -112,7 +111,6 @@ const navbarStyles = `
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
 }
 
-/* --- ESTILOS PARA LA SECCIÓN DE USUARIO --- */
 .navbar-auth-section {
     display: flex;
     align-items: center;
@@ -160,7 +158,6 @@ const navbarStyles = `
     box-shadow: 0 0 10px rgba(255, 0, 110, 0.4);
     color: #FFFFFF;
 }
-/* ------------------------------------------------- */
 
 .navbar-cart-btn {
     position: relative;
@@ -204,7 +201,6 @@ const navbarStyles = `
     animation: pulse-neon 1s ease-in-out infinite;
 }
 
-/* Hamburger para móvil */
 .navbar-hamburger {
     display: none;
     flex-direction: column;
@@ -236,7 +232,6 @@ const navbarStyles = `
     background: #00D4FF;
 }
 
-/* Mobile menu */
 .navbar-mobile-menu {
     position: fixed;
     top: 70px;
@@ -320,7 +315,6 @@ function Header() {
                         <li><Link to="/" className={isActive('/') ? 'active' : ''}>Inicio</Link></li>
                         <li><Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''}>Catálogo</Link></li>
 
-                        {/* MIS PEDIDOS AHORA SOLO APARECE SI NO ES ADMIN */}
                         {usuario && !isAdmin && (
                             <li><Link to="/mis-pedidos" className={isActive('/mis-pedidos') ? 'active' : ''}>📦 Mis Pedidos</Link></li>
                         )}
@@ -368,7 +362,6 @@ function Header() {
                 <Link to="/" className={isActive('/') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🏠 Inicio</Link>
                 <Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🎮 Catálogo</Link>
 
-                {/* En móvil sí dejamos el carrito porque el botón grande se oculta */}
                 <Link to="/carrito" className={isActive('/carrito') ? 'active' : ''} onClick={() => setMenuOpen(false)}>🛒 Carrito {cantidadTotal > 0 && `(${cantidadTotal})`}</Link>
 
                 {usuario && !isAdmin && (

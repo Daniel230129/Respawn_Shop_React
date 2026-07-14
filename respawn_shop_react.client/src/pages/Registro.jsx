@@ -23,7 +23,7 @@ function Registro() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [mensaje, setMensaje] = useState('');
-    const [exito, setExito] = useState(''); // ESTADO PARA EL MENSAJE DE ÉXITO
+    const [exito, setExito] = useState('');
 
     const navigate = useNavigate();
 
@@ -50,7 +50,6 @@ function Registro() {
             });
 
             if (response.ok) {
-                // AQUÍ REEMPLAZAMOS EL ALERT FEO
                 setExito('🎉 ¡Registro exitoso! Llevándote al login...');
                 setTimeout(() => {
                     navigate('/login');
@@ -72,7 +71,6 @@ function Registro() {
                     <h2 className="auth-title">Crear Cuenta</h2>
                     <p className="auth-subtitle">Únete a la comunidad de Respawn Shop</p>
 
-                    {/* CAJAS DE MENSAJES */}
                     {mensaje && <div style={{ backgroundColor: 'rgba(255, 0, 110, 0.1)', border: '1px solid #FF006E', color: '#FF006E', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontWeight: 'bold' }}>{mensaje}</div>}
                     {exito && <div style={{ backgroundColor: 'rgba(0, 255, 136, 0.1)', border: '1px solid #00FF88', color: '#00FF88', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontWeight: 'bold' }}>{exito}</div>}
 

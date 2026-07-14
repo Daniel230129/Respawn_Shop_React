@@ -331,7 +331,7 @@ function Catalogo() {
 
                 <div className="catalogo-grid">
                     {productosVisibles.map((producto) => {
-                        const sinStock = producto.stock <= 0; // Calculamos si no hay stock
+                        const sinStock = producto.stock <= 0;
 
                         return (
                             <div key={producto.id} className="product-card">
@@ -370,7 +370,6 @@ function Catalogo() {
 
                                     <span className="product-card-price">${producto.precio?.toFixed(2)}</span>
 
-                                    {/* BOTÓN CON CONDICIONAL DE STOCK */}
                                     <button
                                         onClick={() => intentarAgregar(producto)}
                                         className="product-card-btn"

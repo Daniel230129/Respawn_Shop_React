@@ -209,12 +209,10 @@ function MisPedidos() {
     const [pedidos, setPedidos] = useState([]);
     const [cargando, setCargando] = useState(true);
 
-    // Extraemos el usuario directamente del contexto
     const { usuario } = useContext(AuthContext);
 
     useEffect(() => {
         const cargarPedidos = async () => {
-            // Si no hay usuario cargado en el contexto, no hacemos la petición
             if (!usuario || !usuario.id) {
                 setCargando(false);
                 return;
@@ -223,7 +221,6 @@ function MisPedidos() {
             try {
                 const token = localStorage.getItem('token');
 
-                // 1. AHORA SÍ: Apuntamos a la ruta general que existe en tu .NET
                 const res = await fetch(`https://localhost:7284/api/Pedidos`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -231,8 +228,6 @@ function MisPedidos() {
                 if (res.ok) {
                     const todosLosPedidos = await res.json();
 
-                    // 2. EL TRUCO MÁGICO: Filtramos en React para que solo vea los suyos
-                    // Usamos Number() por si el ID viene como texto en un lado y como número en otro
                     const misPedidosFiltrados = todosLosPedidos.filter(
                         pedido => Number(pedido.usuarioId) === Number(usuario.id)
                     );
