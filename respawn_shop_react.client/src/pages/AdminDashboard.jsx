@@ -6,7 +6,6 @@ function AdminDashboard() {
     const rol = localStorage.getItem('rol');
 
     useEffect(() => {
-        // SEGURIDAD: Si no eres admin, pa' fuera
         if (rol !== 'Administrador') {
             navigate('/');
         }
@@ -23,7 +22,6 @@ function AdminDashboard() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
 
-                {/* Tarjeta Gestionar Productos */}
                 <div style={{ background: '#111128', border: '1px solid #1e1e3f', padding: '30px', borderRadius: '16px', textAlign: 'center' }}>
                     <h2 style={{ fontSize: '3rem', margin: '0 0 15px 0' }}>📦</h2>
                     <h3 style={{ fontFamily: 'Orbitron', marginBottom: '10px' }}>Inventario</h3>
@@ -36,7 +34,6 @@ function AdminDashboard() {
                     </Link>
                 </div>
 
-                {/* Tarjeta Ver Pedidos */}
                 <div style={{ background: '#111128', border: '1px solid #1e1e3f', padding: '30px', borderRadius: '16px', textAlign: 'center' }}>
                     <h2 style={{ fontSize: '3rem', margin: '0 0 15px 0' }}>🧾</h2>
                     <h3 style={{ fontFamily: 'Orbitron', marginBottom: '10px' }}>Pedidos</h3>

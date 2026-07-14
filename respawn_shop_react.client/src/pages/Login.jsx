@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const loginStyles = `
-/* (Mismos estilos que ya tenías, no los toqué) */
 .auth-page { display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 2rem; }
 .auth-card { background: #111128; border: 1px solid #1e1e3f; border-radius: 16px; padding: 3rem; width: 100%; max-width: 450px; box-shadow: 0 0 30px rgba(0,212,255,0.05); text-align: center; position: relative; overflow: hidden; }
 .auth-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #00D4FF, #7B2FBE); }
@@ -20,7 +19,6 @@ const loginStyles = `
 .auth-link:hover { color: #00D4FF; text-decoration: underline; }
 `;
 
-// Función mágica para leer el JWT en React
 const decodificarJWT = (token) => {
     try {
         const base64Url = token.split('.')[1];
@@ -58,29 +56,23 @@ function Login() {
                 const data = await response.json();
                 const token = data.token;
 
-                // 1. Abrimos el token para ver qué tiene adentro
                 const datosDesencriptados = decodificarJWT(token);
 
-                // 2. Extraemos TODO lo que necesitamos (Nombre, Rol y el ID oculto)
                 const rolDelUsuario = datosDesencriptados['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || datosDesencriptados.role || datosDesencriptados.rol || 'Cliente';
                 const nombreUsuario = datosDesencriptados.unique_name || email.split('@')[0];
 
-                // .NET guarda el ID aquí casi siempre:
                 const idDelUsuario = datosDesencriptados['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || datosDesencriptados.nameid || datosDesencriptados.sub || datosDesencriptados.id || null;
 
-                // 3. Guardamos el rol en el LocalStorage
                 localStorage.setItem('rol', rolDelUsuario);
 
-                // 4. AQUÍ ESTÁ LA SOLUCIÓN: Pasamos el objeto completo al AuthContext
                 login({
                     id: idDelUsuario,
                     nombre: nombreUsuario,
                     rol: rolDelUsuario
                 }, token);
 
-                // Si es admin lo mandamos a su panel, si es cliente al inicio
                 if (rolDelUsuario === 'Administrador') {
-                    navigate('/admin/inventario'); // Te cambié la ruta para que caiga directo en una válida
+                    navigate('/admin/inventario');
                 } else {
                     navigate('/');
                 }

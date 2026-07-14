@@ -4,7 +4,6 @@ import { createContext, useState } from 'react';
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    // Inicializamos el estado leyendo directamente la memoria (¡mucho más eficiente que useEffect!)
     const [usuario, setUsuario] = useState(() => {
         const token = localStorage.getItem('token');
         const nombre = localStorage.getItem('nombreUsuario');

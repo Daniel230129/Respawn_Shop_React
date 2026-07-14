@@ -18,15 +18,12 @@ export function CartProvider({ children }) {
             return [...carritoActual, { ...producto, cantidad: 1 }];
         });
 
-        //toast.success(`¡${producto.nombre} añadido al carrito! 🎮`);
     };
 
-    // Función para borrar un juego completo
     const eliminarDelCarrito = (id) => {
         setCarrito((carritoActual) => carritoActual.filter((item) => item.id !== id));
     };
 
-    // Función para los botones de + y -
     const actualizarCantidad = (id, nuevaCantidad) => {
         if (nuevaCantidad < 1) return;
         setCarrito((carritoActual) =>
