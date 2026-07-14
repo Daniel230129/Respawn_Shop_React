@@ -15,7 +15,7 @@ function AdminDashboard() {
     return (
         <div style={{ padding: '3rem 2rem', maxWidth: '1200px', margin: '0 auto', minHeight: '70vh', color: 'white' }}>
             <h1 style={{ fontFamily: 'Orbitron, sans-serif', color: '#00D4FF', marginBottom: '20px' }}>
-                👑 Panel de Control (Modo Dios)
+                Panel de Control
             </h1>
             <p style={{ color: '#A0ADB8', marginBottom: '40px' }}>
                 Bienvenido Administrador. Selecciona lo que deseas gestionar:
